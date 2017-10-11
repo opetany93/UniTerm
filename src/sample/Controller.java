@@ -44,14 +44,12 @@ public class Controller implements Initializable
     private SerialPort serialPort;
 
     private SerialPort[] comPorts;
-    private int baudRate;
-
+    private int baudRate = 115200;
+    // ==========================================================================
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        baudRate = 115200;
-
         // ========================== Config radio buttons init =====================
         noParity.setToggleGroup(parityGroup);
         noParity.setSelected(true);
@@ -78,38 +76,8 @@ public class Controller implements Initializable
         oneStopBit.setUserData(SerialPort.ONE_STOP_BIT);
         twoStopBit.setToggleGroup(stopBitsGroup);
         twoStopBit.setUserData(SerialPort.TWO_STOP_BITS);
-        // ==========================================================================
 
-        comPorts = SerialPort.getCommPorts();
-
-        for (SerialPort port : comPorts)
-        {
-            COMselector.getItems().add(port.getDescriptivePortName());
-        }
-
-        if(!COMselector.getItems().isEmpty())
-            COMselector.getSelectionModel().select(0);
-
-        // ============= Baud Rate ComboBox initial values ===========================
-        baudRateComboBox.getItems().add("9600");
-        baudRateComboBox.getItems().add("14400");
-        baudRateComboBox.getItems().add("19200");
-        baudRateComboBox.getItems().add("38400");
-        baudRateComboBox.getItems().add("56000");
-        baudRateComboBox.getItems().add("57600");
-        baudRateComboBox.getItems().add("115200");
-        baudRateComboBox.getItems().add("128000");
-        baudRateComboBox.getItems().add("230400");
-        baudRateComboBox.getItems().add("256000");
-        baudRateComboBox.getItems().add("460800");
-        baudRateComboBox.getItems().add("921600");
-        baudRateComboBox.getItems().add("1000000");
-        baudRateComboBox.getItems().add("2000000");
-        baudRateComboBox.getItems().add("3000000");
-        baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
-        statusBaudRateLabel.setText(String.valueOf(baudRate));
-        // ===========================================================================
-
+        // ======================= Config radio buttons events init ==================
         noParity.setOnAction(event ->
         {
             System.out.println("No parity bit chosen");
@@ -175,42 +143,42 @@ public class Controller implements Initializable
             if( null != serialPort )
                 serialPort.setNumStopBits(SerialPort.TWO_STOP_BITS);
         });
+        // ===========================================================================
 
-        baudRateComboBox.setOnAction(event ->
+        // ==========================================================================
+        comPorts = SerialPort.getCommPorts();
+
+        for (SerialPort port : comPorts)
         {
-            try
-            {
-                baudRate = Integer.parseInt(baudRateComboBox.getSelectionModel().getSelectedItem());
-                if (3000000 < baudRate)
-                    baudRate = 3000000;
-                System.out.println("Set baudRate to " + baudRate + ".");
-                baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
-                statusBaudRateLabel.setText(String.valueOf(baudRate));
+            COMselector.getItems().add(port.getDescriptivePortName());
+        }
 
-                if( null != serialPort)
-                    serialPort.setBaudRate(baudRate);
-            }
-            catch (Exception ignored){}
-        });
+        if(!COMselector.getItems().isEmpty())
+            COMselector.getSelectionModel().select(0);
+        // ==========================================================================
 
-        COMselector.setOnMouseClicked(event ->
-        {
-            String temp = COMselector.getSelectionModel().getSelectedItem();
+        // ============= Baud Rate ComboBox initial values ===========================
+        baudRateComboBox.getItems().add("9600");
+        baudRateComboBox.getItems().add("14400");
+        baudRateComboBox.getItems().add("19200");
+        baudRateComboBox.getItems().add("38400");
+        baudRateComboBox.getItems().add("56000");
+        baudRateComboBox.getItems().add("57600");
+        baudRateComboBox.getItems().add("115200");
+        baudRateComboBox.getItems().add("128000");
+        baudRateComboBox.getItems().add("230400");
+        baudRateComboBox.getItems().add("256000");
+        baudRateComboBox.getItems().add("460800");
+        baudRateComboBox.getItems().add("921600");
+        baudRateComboBox.getItems().add("1000000");
+        baudRateComboBox.getItems().add("2000000");
+        baudRateComboBox.getItems().add("3000000");
+        baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
+        statusBaudRateLabel.setText(String.valueOf(baudRate));
+        // ===========================================================================
 
-            COMselector.getItems().clear();
-            comPorts = SerialPort.getCommPorts();
-
-            for (SerialPort port : comPorts)
-            {
-                COMselector.getItems().add(port.getDescriptivePortName());
-
-                if ( port.getDescriptivePortName().equals(port.getDescriptivePortName()) )
-                {
-                    COMselector.getSelectionModel().select(temp);
-                }
-            }
-        });
-
+        baudRateComboBox.setOnAction(event -> baudRateComboBoxOnActionEvent());
+        COMselector.setOnMouseClicked(event -> comSelectOnMouseClickedEvent());
         openButton.setOnMouseClicked(event -> openButtonEvent());
         closeButton.setOnMouseClicked(event -> closeButtonEvent());
         sendButton.setOnMouseClicked(event -> sendButtonEvent());
@@ -222,6 +190,41 @@ public class Controller implements Initializable
                 sendButtonEvent();
             }
         });
+    }
+
+    private void baudRateComboBoxOnActionEvent()
+    {
+        try
+        {
+            baudRate = Integer.parseInt(baudRateComboBox.getSelectionModel().getSelectedItem());
+            if (3000000 < baudRate)
+                baudRate = 3000000;
+            System.out.println("Set baudRate to " + baudRate + ".");
+            baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
+            statusBaudRateLabel.setText(String.valueOf(baudRate));
+
+            if( null != serialPort)
+                serialPort.setBaudRate(baudRate);
+        }
+        catch (Exception ignored){}
+    }
+
+    private void comSelectOnMouseClickedEvent()
+    {
+        String previous = COMselector.getSelectionModel().getSelectedItem();
+
+        COMselector.getItems().clear();
+        comPorts = SerialPort.getCommPorts();
+
+        for (SerialPort port : comPorts)
+        {
+            COMselector.getItems().add(port.getDescriptivePortName());
+
+            if ( port.getDescriptivePortName().equals(port.getDescriptivePortName()) )
+            {
+                COMselector.getSelectionModel().select(previous);
+            }
+        }
     }
 
     private void sendButtonEvent()
