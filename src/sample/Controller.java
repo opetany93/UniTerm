@@ -41,12 +41,6 @@ public class Controller implements Initializable
     Label statusBaudRateLabel;
 
     // ==========================================================================================
-    private SerialPort serialPort;
-
-    private SerialPort[] comPorts;
-    private int baudRate = 115200;
-    // ==========================================================================
-
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
@@ -78,77 +72,13 @@ public class Controller implements Initializable
         twoStopBit.setUserData(SerialPort.TWO_STOP_BITS);
 
         // ======================= Config radio buttons events init ==================
-        noParity.setOnAction(event ->
-        {
-            System.out.println("No parity bit chosen");
-
-            if( null != serialPort )
-                serialPort.setParity(SerialPort.NO_PARITY);
-        });
-        oddParity.setOnAction(event ->
-        {
-            System.out.println("Odd parity bit chosen");
-
-            if( null != serialPort )
-                serialPort.setParity(SerialPort.ODD_PARITY);
-        });
-        evenParity.setOnAction(event ->
-        {
-            System.out.println("Even parity bit chosen");
-
-            if( null != serialPort )
-                serialPort.setParity(SerialPort.EVEN_PARITY);
-        });
-
-        eightBits.setOnAction(event ->
-        {
-            System.out.println("8 data bits chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumDataBits(8);
-        });
-        sevenBits.setOnAction(event ->
-        {
-            System.out.println("7 data bits chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumDataBits(7);
-        });
-        sixBits.setOnAction(event ->
-        {
-            System.out.println("6 data bits chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumDataBits(6);
-        });
-        fiveBits.setOnAction(event ->
-        {
-            System.out.println("5 data bits chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumDataBits(5);
-        });
-
-        oneStopBit.setOnAction(event ->
-        {
-            System.out.println("1 stop bit chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumStopBits(SerialPort.ONE_STOP_BIT);
-        });
-        twoStopBit.setOnAction(event ->
-        {
-            System.out.println("2 stop bit chosen.");
-
-            if( null != serialPort )
-                serialPort.setNumStopBits(SerialPort.TWO_STOP_BITS);
-        });
+        parityGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> Port.getInstance().setParity(newValue));
+        dataBitsGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> Port.getInstance().setNumDataBits(newValue));
+        stopBitsGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> Port.getInstance().setNumStopBits(newValue));
         // ===========================================================================
 
         // ==========================================================================
-        comPorts = SerialPort.getCommPorts();
-
-        for (SerialPort port : comPorts)
+        for (SerialPort port : SerialPort.getCommPorts())
         {
             COMselector.getItems().add(port.getDescriptivePortName());
         }
@@ -173,21 +103,21 @@ public class Controller implements Initializable
         baudRateComboBox.getItems().add("1000000");
         baudRateComboBox.getItems().add("2000000");
         baudRateComboBox.getItems().add("3000000");
-        baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
-        statusBaudRateLabel.setText(String.valueOf(baudRate));
+        baudRateComboBox.getSelectionModel().select(String.valueOf(Port.getInstance().getBaudRate()));
+        statusBaudRateLabel.setText(String.valueOf(Port.getInstance().getBaudRate()));
         // ===========================================================================
 
         baudRateComboBox.setOnAction(event -> baudRateComboBoxOnActionEvent());
         COMselector.setOnMouseClicked(event -> comSelectOnMouseClickedEvent());
         openButton.setOnMouseClicked(event -> openButtonEvent());
         closeButton.setOnMouseClicked(event -> closeButtonEvent());
-        sendButton.setOnMouseClicked(event -> sendButtonEvent());
+        sendButton.setOnMouseClicked(event -> Port.getInstance().send(sendTextField.getText().getBytes()));
 
         sendTextField.setOnKeyPressed((KeyEvent key) ->
         {
             if (key.getCode().equals(KeyCode.ENTER))
             {
-                sendButtonEvent();
+                Port.getInstance().send(sendTextField.getText().getBytes());
             }
         });
     }
@@ -196,27 +126,29 @@ public class Controller implements Initializable
     {
         try
         {
-            baudRate = Integer.parseInt(baudRateComboBox.getSelectionModel().getSelectedItem());
-            if (3000000 < baudRate)
-                baudRate = 3000000;
-            System.out.println("Set baudRate to " + baudRate + ".");
-            baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
-            statusBaudRateLabel.setText(String.valueOf(baudRate));
+            int baudRate = Integer.parseInt(baudRateComboBox.getSelectionModel().getSelectedItem());
 
-            if( null != serialPort)
-                serialPort.setBaudRate(baudRate);
+            if (3000000 < baudRate)
+            {
+                baudRate = 3000000;
+                baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
+            }
+
+            System.out.println("Set baudRate to " + baudRate + ".");
+            statusBaudRateLabel.setText(String.valueOf(baudRate));
+            Port.getInstance().setBaudRate(baudRate);
         }
         catch (Exception ignored){}
     }
 
+    // refresh available ports when combobox is expanded
     private void comSelectOnMouseClickedEvent()
     {
         String previous = COMselector.getSelectionModel().getSelectedItem();
 
         COMselector.getItems().clear();
-        comPorts = SerialPort.getCommPorts();
 
-        for (SerialPort port : comPorts)
+        for (SerialPort port : SerialPort.getCommPorts())
         {
             COMselector.getItems().add(port.getDescriptivePortName());
 
@@ -227,17 +159,20 @@ public class Controller implements Initializable
         }
     }
 
-    private void sendButtonEvent()
+    private void receivedData(byte[] newData, int numRead)
     {
-        byte[] buffer;
+        System.out.println("Read " + numRead + " bytes.");
 
-        buffer = sendTextField.getText().getBytes();
-
-        if(null != serialPort)
+        for( int i = 0; i < newData.length; i++ )
         {
-            if ( serialPort.isOpen() )
+            if ( (newData[i] == '\\')  && (newData[i+1] == 'n') )
             {
-                serialPort.writeBytes(buffer, buffer.length);
+                receivedTextArea.appendText("\n");
+                i++;
+            }
+            else
+            {
+                receivedTextArea.appendText((char)newData[i] + "");
             }
         }
     }
@@ -247,65 +182,29 @@ public class Controller implements Initializable
         if ( null != COMselector.getSelectionModel().getSelectedItem() )
         {
             String systemPortName = COMselector.getSelectionModel().getSelectedItem();
+            systemPortName = systemPortName.substring(systemPortName.indexOf("(")+1, systemPortName.indexOf(")"));
 
-            serialPort = SerialPort.getCommPort(systemPortName.substring(systemPortName.indexOf("(")+1, systemPortName.indexOf(")")));
+            int dataBits = (int)dataBitsGroup.getSelectedToggle().getUserData();
+            int stopBits = (int)stopBitsGroup.getSelectedToggle().getUserData();
+            int parityBit = (int)parityGroup.getSelectedToggle().getUserData();
 
-            serialPort.setComPortParameters(baudRate, (int)dataBitsGroup.getSelectedToggle().getUserData(), (int)stopBitsGroup.getSelectedToggle().getUserData(), (int)parityGroup.getSelectedToggle().getUserData());
+            Port.getInstance().addNewDataListener(this::receivedData);
 
-            try
-            {
-                serialPort.openPort();
-            }
-            catch (Exception ignored){}
-
-            if (serialPort.isOpen())
+            if (Port.getInstance().open(systemPortName, dataBits, stopBits, parityBit))
             {
                 openButton.setDisable(true);
                 closeButton.setDisable(false);
                 System.out.println("Port is opened.");
             }
         }
-
-        serialPort.addDataListener(new SerialPortDataListener()
-        {
-            @Override
-            public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_AVAILABLE; }
-            @Override
-            public void serialEvent(SerialPortEvent event)
-            {
-                if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
-                    return;
-                byte[] newData = new byte[serialPort.bytesAvailable()];
-                int numRead = serialPort.readBytes(newData, newData.length);
-                System.out.println("Read " + numRead + " bytes.");
-
-
-                for( int i = 0; i < newData.length; i++ )
-                {
-                    if ( (newData[i] == '\\')  && (newData[i+1] == 'n') )
-                    {
-                        receivedTextArea.appendText("\n");
-                        i++;
-                    }
-                    else
-                    {
-                        receivedTextArea.appendText((char)newData[i] + "");
-                    }
-                }
-            }
-        });
     }
 
     private void closeButtonEvent()
     {
-        serialPort.closePort();
+        Port.getInstance().close();
 
-        if (!serialPort.isOpen())
-        {
-            openButton.setDisable(false);
-            closeButton.setDisable(true);
-            System.out.println("Port is closed.");
-            serialPort = null;
-        }
+        openButton.setDisable(false);
+        closeButton.setDisable(true);
+        System.out.println("Port is closed.");
     }
 }
