@@ -6,6 +6,11 @@ import javafx.scene.control.Toggle;
 import java.util.ArrayList;
 import java.util.List;
 
+interface NewDataEvent
+{
+    void dataReceivedEvent(byte[] newData, int numRead);
+}
+
 class Port
 {
     private static volatile Port PortINSTANCE;
@@ -156,7 +161,22 @@ class Port
         if( null != serialPort )
         {
             serialPort.setNumStopBits((int) newValue.getUserData());
-            System.out.println(serialPort.getNumStopBits() + " stop bits is set.");
+
+            switch (serialPort.getNumStopBits())
+            {
+                case SerialPort.ONE_STOP_BIT:
+                {
+                    System.out.println("1 stop bits is set.");
+
+                    break;
+                }
+                case SerialPort.TWO_STOP_BITS:
+                {
+                    System.out.println("2 stop bits is set.");
+
+                    break;
+                }
+            }
         }
     }
 }
