@@ -1,31 +1,26 @@
-package sample;
+package view.portTab;
 
-import com.fazecast.jSerialComm.*;
+import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
+import serialPort.Port;
+import view.logTab.Logger;
+import view.statusBar.StatusBar;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ResourceBundle;
 
-
-
-public class Controller implements Initializable
+public class portTabController implements Initializable
 {
-    // ================== FXML =================================================================
     @FXML
     private ComboBox<String> COMselector, baudRateComboBox;
 
     @FXML
-    Button openButton, closeButton, sendButton;
-
-    @FXML
-    TextField sendTextField;
-
-    @FXML
-    TextArea receivedTextArea;
+    Button openButton, closeButton;
 
     @FXML
     RadioButton noParity, oddParity, evenParity;
@@ -39,13 +34,44 @@ public class Controller implements Initializable
     private RadioButton oneStopBit, twoStopBit;
     private final ToggleGroup stopBitsGroup = new ToggleGroup();
 
-    @FXML
-    Label statusBaudRateLabel;
-
-    // ==========================================================================================
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
+        // ==========================================================================
+        for (SerialPort port : SerialPort.getCommPorts())
+        {
+            COMselector.getItems().add(port.getDescriptivePortName());
+        }
+
+        if(!COMselector.getItems().isEmpty())
+            COMselector.getSelectionModel().select(0);
+        // ==========================================================================
+
+        // ============= Baud Rate ComboBox initial values ===========================
+        baudRateComboBox.getItems().add("9600");
+        baudRateComboBox.getItems().add("14400");
+        baudRateComboBox.getItems().add("19200");
+        baudRateComboBox.getItems().add("38400");
+        baudRateComboBox.getItems().add("56000");
+        baudRateComboBox.getItems().add("57600");
+        baudRateComboBox.getItems().add("115200");
+        baudRateComboBox.getItems().add("128000");
+        baudRateComboBox.getItems().add("230400");
+        baudRateComboBox.getItems().add("256000");
+        baudRateComboBox.getItems().add("460800");
+        baudRateComboBox.getItems().add("921600");
+        baudRateComboBox.getItems().add("1000000");
+        baudRateComboBox.getItems().add("2000000");
+        baudRateComboBox.getItems().add("3000000");
+        baudRateComboBox.getSelectionModel().select(String.valueOf(Port.getInstance().getBaudRate()));
+        // ===========================================================================
+
+        openButton.setOnMouseClicked(event -> openButtonEvent());
+        closeButton.setOnMouseClicked(event -> closeButtonEvent());
+
+        baudRateComboBox.setOnAction(event -> baudRateComboBoxOnActionEvent());
+        COMselector.setOnMouseClicked(event -> comSelectOnMouseClickedEvent());
+
         // ========================== Config radio buttons init =====================
         noParity.setToggleGroup(parityGroup);
         noParity.setSelected(true);
@@ -78,50 +104,6 @@ public class Controller implements Initializable
         dataBitsGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> Port.getInstance().setNumDataBits(newValue));
         stopBitsGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> Port.getInstance().setNumStopBits(newValue));
         // ===========================================================================
-
-        // ==========================================================================
-        for (SerialPort port : SerialPort.getCommPorts())
-        {
-            COMselector.getItems().add(port.getDescriptivePortName());
-        }
-
-        if(!COMselector.getItems().isEmpty())
-            COMselector.getSelectionModel().select(0);
-        // ==========================================================================
-
-        // ============= Baud Rate ComboBox initial values ===========================
-        baudRateComboBox.getItems().add("9600");
-        baudRateComboBox.getItems().add("14400");
-        baudRateComboBox.getItems().add("19200");
-        baudRateComboBox.getItems().add("38400");
-        baudRateComboBox.getItems().add("56000");
-        baudRateComboBox.getItems().add("57600");
-        baudRateComboBox.getItems().add("115200");
-        baudRateComboBox.getItems().add("128000");
-        baudRateComboBox.getItems().add("230400");
-        baudRateComboBox.getItems().add("256000");
-        baudRateComboBox.getItems().add("460800");
-        baudRateComboBox.getItems().add("921600");
-        baudRateComboBox.getItems().add("1000000");
-        baudRateComboBox.getItems().add("2000000");
-        baudRateComboBox.getItems().add("3000000");
-        baudRateComboBox.getSelectionModel().select(String.valueOf(Port.getInstance().getBaudRate()));
-        statusBaudRateLabel.setText(String.valueOf(Port.getInstance().getBaudRate()));
-        // ===========================================================================
-
-        baudRateComboBox.setOnAction(event -> baudRateComboBoxOnActionEvent());
-        COMselector.setOnMouseClicked(event -> comSelectOnMouseClickedEvent());
-        openButton.setOnMouseClicked(event -> openButtonEvent());
-        closeButton.setOnMouseClicked(event -> closeButtonEvent());
-        sendButton.setOnMouseClicked(event -> Port.getInstance().send(sendTextField.getText().getBytes()));
-
-        sendTextField.setOnKeyPressed((KeyEvent key) ->
-        {
-            if (key.getCode().equals(KeyCode.ENTER))
-            {
-                Port.getInstance().send(sendTextField.getText().getBytes());
-            }
-        });
     }
 
     private void baudRateComboBoxOnActionEvent()
@@ -136,8 +118,9 @@ public class Controller implements Initializable
                 baudRateComboBox.getSelectionModel().select(String.valueOf(baudRate));
             }
 
-            System.out.println("Set baudRate to " + baudRate + ".");
-            statusBaudRateLabel.setText(String.valueOf(baudRate));
+            Logger.getInstance().log("Set baudRate to " + baudRate + " bps.");
+
+            StatusBar.getInstance().setBaudrate(String.valueOf(baudRate));
             Port.getInstance().setBaudRate(baudRate);
         }
         catch (Exception ignored){}
@@ -161,24 +144,6 @@ public class Controller implements Initializable
         }
     }
 
-    private void receivedData(byte[] newData, int numRead)
-    {
-        System.out.println("Read " + numRead + " bytes.");
-
-        for( int i = 0; i < newData.length; i++ )
-        {
-            if ( (newData[i] == '\\')  && (newData[i+1] == 'n') )
-            {
-                receivedTextArea.appendText("\n");
-                i++;
-            }
-            else
-            {
-                receivedTextArea.appendText((char)newData[i] + "");
-            }
-        }
-    }
-
     private void openButtonEvent()
     {
         if ( null != COMselector.getSelectionModel().getSelectedItem() )
@@ -190,13 +155,11 @@ public class Controller implements Initializable
             int stopBits = (int)stopBitsGroup.getSelectedToggle().getUserData();
             int parityBit = (int)parityGroup.getSelectedToggle().getUserData();
 
-            Port.getInstance().addNewDataListener(this::receivedData);
-
             if (Port.getInstance().open(systemPortName, dataBits, stopBits, parityBit))
             {
                 openButton.setDisable(true);
                 closeButton.setDisable(false);
-                System.out.println("Port is opened.");
+                Logger.getInstance().log("Port is opened.");
             }
         }
     }
@@ -207,6 +170,6 @@ public class Controller implements Initializable
 
         openButton.setDisable(false);
         closeButton.setDisable(true);
-        System.out.println("Port is closed.");
+        Logger.getInstance().log("Port is closed.");
     }
 }

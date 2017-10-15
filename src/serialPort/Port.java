@@ -1,17 +1,13 @@
-package sample;
+package serialPort;
 
 import com.fazecast.jSerialComm.*;
 import javafx.scene.control.Toggle;
+import view.logTab.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-interface NewDataEvent
-{
-    void dataReceivedEvent(byte[] newData, int numRead);
-}
-
-class Port
+public class Port
 {
     private static volatile Port PortINSTANCE;
     private SerialPort serialPort;
@@ -25,7 +21,7 @@ class Port
 
     }
 
-    static Port getInstance()
+    public static Port getInstance()
     {
         if (null == PortINSTANCE)
         {
@@ -40,12 +36,12 @@ class Port
         return PortINSTANCE;
     }
 
-    int getBaudRate()
+    public int getBaudRate()
     {
         return baudRate;
     }
 
-    void setBaudRate(int baudRate)
+    public void setBaudRate(int baudRate)
     {
         this.baudRate = baudRate;
 
@@ -54,13 +50,13 @@ class Port
     }
 
 
-    void addNewDataListener(NewDataEvent event)
+    public void addNewDataListener(NewDataEvent event)
     {
         newDataEvents.add(event);
     }
 
     // ==============================================================================
-    boolean open(String serialPortName, int dataBits, int stopBits, int parityBits)
+    public boolean open(String serialPortName, int dataBits, int stopBits, int parityBits)
     {
         if(null != serialPortName)
         {
@@ -94,7 +90,7 @@ class Port
         return false;
     }
 
-    void send(byte[] buffer)
+    public void send(byte[] buffer)
     {
         if(null != serialPort)
         {
@@ -105,7 +101,7 @@ class Port
         }
     }
 
-    void close()
+    public void close()
     {
         if(null != serialPort)
         {
@@ -118,7 +114,7 @@ class Port
         }
     }
 
-    void setParity(Toggle newValue)
+    public void setParity(Toggle newValue)
     {
         if( null != serialPort )
         {
@@ -128,35 +124,35 @@ class Port
             {
                 case SerialPort.NO_PARITY:
                 {
-                    System.out.println("No parity bit is set.");
+                    Logger.getInstance().log("No parity bit is set.");
                     break;
                 }
 
                 case SerialPort.ODD_PARITY:
                 {
-                    System.out.println("Odd parity bit is set.");
+                    Logger.getInstance().log("Odd parity bit is set.");
                     break;
                 }
 
                 case SerialPort.EVEN_PARITY:
                 {
-                    System.out.println("Even parity bit is set.");
+                    Logger.getInstance().log("Even parity bit is set.");
                     break;
                 }
             }
         }
     }
 
-    void setNumDataBits(Toggle newValue)
+    public void setNumDataBits(Toggle newValue)
     {
         if( null != serialPort )
         {
             serialPort.setNumDataBits((int)newValue.getUserData());
-            System.out.println(serialPort.getNumDataBits() + " data bits is set.");
+            Logger.getInstance().log(serialPort.getNumDataBits() + " data bits is set.");
         }
     }
 
-    void setNumStopBits(Toggle newValue)
+    public void setNumStopBits(Toggle newValue)
     {
         if( null != serialPort )
         {
@@ -166,13 +162,13 @@ class Port
             {
                 case SerialPort.ONE_STOP_BIT:
                 {
-                    System.out.println("1 stop bits is set.");
+                    Logger.getInstance().log("1 stop bits is set.");
 
                     break;
                 }
                 case SerialPort.TWO_STOP_BITS:
                 {
-                    System.out.println("2 stop bits is set.");
+                    Logger.getInstance().log("2 stop bits is set.");
 
                     break;
                 }

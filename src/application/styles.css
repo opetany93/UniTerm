@@ -9,8 +9,21 @@
 }*/
 
 
-.text-area:focused {
+.text-area:focused
+{
     -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border),
                   linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
 }
 
+
+.chart-series-line
+{
+    -fx-stroke: black;
+    -fx-stroke-width: 0.5px;
+    -fx-effect: null;
+}
+
+.series1.chart-series-line {
+    -fx-stroke: red;
+    -fx-stroke-width: 2px;
+}

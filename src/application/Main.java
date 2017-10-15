@@ -1,4 +1,4 @@
-package sample;
+package application;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,12 +12,14 @@ public class Main extends Application
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/view/Main.fxml"));
         primaryStage.setTitle("UniTerm");
 
         Scene s = new Scene(root);
         s.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.setScene(s);
+        primaryStage.setMinHeight(600);
+        primaryStage.setMinWidth(800);
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(e ->

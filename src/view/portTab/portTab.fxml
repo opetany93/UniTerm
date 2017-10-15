@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.portTab.portTabController">
+   <ComboBox fx:id="COMselector" layoutX="91.0" layoutY="16.0" prefHeight="25.0" prefWidth="195.0"/>
+   <Button fx:id="openButton" layoutX="295.0" layoutY="16.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="60.0"
+           text="Open"/>
+   <Button fx:id="closeButton" disable="true" layoutX="295.0" layoutY="46.0" mnemonicParsing="false" prefHeight="25.0"
+           prefWidth="60.0" text="Close"/>
+   <Separator layoutX="91.0" layoutY="87.0" orientation="VERTICAL" prefHeight="100.0" prefWidth="27.0"/>
+   <VBox layoutX="14.0" layoutY="86.0" prefHeight="109.0" prefWidth="85.0" spacing="10.0">
+      <RadioButton fx:id="noParity" mnemonicParsing="false" text="No Parity"/>
+      <RadioButton fx:id="oddParity" mnemonicParsing="false" text="Odd Parity"/>
+      <RadioButton fx:id="evenParity" mnemonicParsing="false" text="Even Parity"/>
+   </VBox>
+   <Label layoutX="14.0" layoutY="18.0" prefHeight="17.0" prefWidth="39.0" text="Port:">
+      <font>
+         <Font size="14.0"/>
+      </font>
+   </Label>
+   <Label layoutX="14.0" layoutY="48.0" text="Baud Rate:">
+      <font>
+         <Font size="14.0"/>
+      </font>
+   </Label>
+   <ComboBox fx:id="baudRateComboBox" editable="true" layoutX="91.0" layoutY="46.0" prefHeight="25.0"
+             prefWidth="195.0"/>
+   <VBox layoutX="118.0" layoutY="86.0" prefHeight="117.0" prefWidth="58.0" spacing="10.0">
+      <RadioButton fx:id="eightBits" mnemonicParsing="false" text="8 bits"/>
+      <RadioButton fx:id="sevenBits" mnemonicParsing="false" text="7 bits"/>
+      <RadioButton fx:id="sixBits" mnemonicParsing="false" text="6 bits"/>
+      <RadioButton fx:id="fiveBits" mnemonicParsing="false" text="5 bits"/>
+   </VBox>
+   <Separator layoutX="176.0" layoutY="87.0" orientation="VERTICAL" prefHeight="100.0" prefWidth="27.0"/>
+   <Separator layoutX="281.0" layoutY="88.0" orientation="VERTICAL" prefHeight="100.0" prefWidth="27.0"/>
+   <VBox layoutX="205.0" layoutY="86.0" prefHeight="96.0" prefWidth="80.0" spacing="10.0">
+      <RadioButton fx:id="oneStopBit" mnemonicParsing="false" text="1 Stop Bit"/>
+      <RadioButton fx:id="twoStopBit" mnemonicParsing="false" text="2 Stop Bit"/>
+   </VBox>
+</AnchorPane>

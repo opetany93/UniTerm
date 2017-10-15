@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.Controller">
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" text="New"/>
+            <MenuItem mnemonicParsing="false" text="Open…"/>
+            <Menu mnemonicParsing="false" text="Open Recent"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Close"/>
+            <MenuItem mnemonicParsing="false" text="Save"/>
+            <MenuItem mnemonicParsing="false" text="Save As…"/>
+            <MenuItem mnemonicParsing="false" text="Revert"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Preferences…"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Quit"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <MenuItem mnemonicParsing="false" text="Undo"/>
+            <MenuItem mnemonicParsing="false" text="Redo"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Cut"/>
+            <MenuItem mnemonicParsing="false" text="Copy"/>
+            <MenuItem mnemonicParsing="false" text="Paste"/>
+            <MenuItem mnemonicParsing="false" text="Delete"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Select All"/>
+            <MenuItem mnemonicParsing="false" text="Unselect All"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="About MyHelloApp"/>
+        </Menu>
+    </MenuBar>
+    <TabPane prefHeight="600.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+        <Tab text="Data">
+            <fx:include source="dataTab/dataTab.fxml"/>
+        </Tab>
+        <Tab fx:id="plotterTab" text="Plotter"/>
+    </TabPane>
+    <TabPane maxHeight="215.0" minHeight="215.0" prefHeight="215.0" prefWidth="900.0" tabClosingPolicy="UNAVAILABLE">
+        <Tab text="Port">
+            <fx:include source="portTab/portTab.fxml"/>
+        </Tab>
+        <Tab text="Data">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <TextField fx:id="sendTextField" layoutX="5.0" layoutY="10.0" prefHeight="25.0"
+                           prefWidth="256.0"/>
+                <Button fx:id="sendButton" layoutX="278.0" layoutY="10.0" mnemonicParsing="false"
+                        text="Send"/>
+            </AnchorPane>
+        </Tab>
+        <Tab text="Plot">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="300.0" prefWidth="200.0">
+                <Button fx:id="startButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false"
+                        text="Start"/>
+                <Button fx:id="stopButton" layoutX="65.0" layoutY="14.0" mnemonicParsing="false"
+                        text="Stop"/>
+            </AnchorPane>
+        </Tab>
+        <Tab text="Log">
+            <fx:include source="logTab/logTab.fxml"/>
+        </Tab>
+    </TabPane>
+    <fx:include source="statusBar/statusBar.fxml"/>
+</VBox>
