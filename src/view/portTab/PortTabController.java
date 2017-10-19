@@ -14,8 +14,10 @@ import view.statusBar.StatusBar;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class portTabController implements Initializable
+public class PortTabController implements Initializable
 {
+    private static volatile PortTabController portTabControllerINSTANCE;
+
     @FXML
     private ComboBox<String> COMselector, baudRateComboBox;
 
@@ -33,6 +35,16 @@ public class portTabController implements Initializable
     @FXML
     private RadioButton oneStopBit, twoStopBit;
     private final ToggleGroup stopBitsGroup = new ToggleGroup();
+
+    public PortTabController()
+    {
+        portTabControllerINSTANCE = this;
+    }
+
+    public static PortTabController getInstance()
+    {
+        return portTabControllerINSTANCE;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
@@ -142,6 +154,11 @@ public class portTabController implements Initializable
                 COMselector.getSelectionModel().select(previous);
             }
         }
+
+        String systemPortName = COMselector.getSelectionModel().getSelectedItem();
+        systemPortName = systemPortName.substring(systemPortName.indexOf("(")+1, systemPortName.indexOf(")"));
+
+        StatusBar.getInstance().setChosenPort(systemPortName);
     }
 
     private void openButtonEvent()
@@ -160,16 +177,27 @@ public class portTabController implements Initializable
                 openButton.setDisable(true);
                 closeButton.setDisable(false);
                 Logger.getInstance().log("Port is opened.");
+                StatusBar.getInstance().setOpenedPortStatus(true);
             }
         }
     }
 
     private void closeButtonEvent()
     {
-        Port.getInstance().close();
+        if (Port.getInstance().close())
+        {
+            openButton.setDisable(false);
+            closeButton.setDisable(true);
+            Logger.getInstance().log("Port is closed.");
+            StatusBar.getInstance().setOpenedPortStatus(false);
+        }
+    }
 
-        openButton.setDisable(false);
-        closeButton.setDisable(true);
-        Logger.getInstance().log("Port is closed.");
+    public String getSelectedPort()
+    {
+        String systemPortName = COMselector.getSelectionModel().getSelectedItem();
+        systemPortName = systemPortName.substring(systemPortName.indexOf("(")+1, systemPortName.indexOf(")"));
+
+        return systemPortName;
     }
 }

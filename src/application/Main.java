@@ -9,9 +9,12 @@ import javafx.stage.Stage;
 
 public class Main extends Application
 {
+    private static Stage primaryStage;
+
     @Override
     public void start(Stage primaryStage) throws Exception
     {
+        setPrimaryStage(primaryStage);
         Parent root = FXMLLoader.load(getClass().getResource("/view/Main.fxml"));
         primaryStage.setTitle("UniTerm");
 
@@ -32,5 +35,13 @@ public class Main extends Application
     public static void main(String[] args)
     {
         launch(args);
+    }
+
+    static public Stage getPrimaryStage() {
+        return Main.primaryStage;
+    }
+
+    private void setPrimaryStage(Stage stage) {
+        Main.primaryStage = stage;
     }
 }

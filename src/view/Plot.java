@@ -12,7 +12,6 @@ import javafx.util.Duration;
 
 public class Plot
 {
-    private LineChart<Number, Number> chart;
     private XYChart.Series<Number, Number> hourDataSeries;
     private XYChart.Series<Number, Number> minuteDataSeries;
     private NumberAxis xAxis;
@@ -44,7 +43,7 @@ public class Plot
     {
         xAxis = new NumberAxis(0, 24, 3);
         final NumberAxis yAxis = new NumberAxis(0, 100, 10);
-        chart = new LineChart<>(xAxis, yAxis);
+        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
         // setup chart
         chart.getStylesheets().add(getClass().getResource("/application/styles.css").toExternalForm());
         chart.setCreateSymbols(false);

@@ -101,17 +101,21 @@ public class Port
         }
     }
 
-    public void close()
+    public boolean close()
     {
+        boolean isOpened = false;
+
         if(null != serialPort)
         {
-            serialPort.closePort();
+            isOpened = serialPort.closePort();
 
             if (!serialPort.isOpen())
             {
                 serialPort = null;
             }
         }
+
+        return isOpened;
     }
 
     public void setParity(Toggle newValue)
@@ -173,6 +177,18 @@ public class Port
                     break;
                 }
             }
+        }
+    }
+
+    public String getSystemPortName()
+    {
+        if ( null != serialPort )
+        {
+            return serialPort.isOpen() ? serialPort.getSystemPortName() : "";
+        }
+        else
+        {
+            return "";
         }
     }
 }
